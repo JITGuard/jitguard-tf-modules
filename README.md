@@ -46,7 +46,15 @@ By decision, these modules deliberately do **not** set `filename` or `source_cod
 Terraform owns the function, role, logs, environment and alias; code is published
 out-of-band by a repo-local deploy script that moves the `live` alias. This keeps a handler
 tweak from requiring a Terraform apply, and keeps Terraform from being a second writer of
-the function. `dummy-bundle/` exists only so the module directory is valid to Terraform.
+the function. `ignore_changes = [filename, source_code_hash]` is the mechanism that makes
+that work: it stops Terraform from overwriting the deployed bundle with the placeholder.
+
+The module ships **no placeholder bundle of its own**. `modules/lambda` generates a
+pathless one-line Node placeholder in-config, which is enough for the initial create before
+the first out-of-band deploy. If a function uses a non-Node runtime, or you would rather
+keep the placeholder in your own repository, set `placeholder_source_dir` to a directory
+containing a suitable `index.mjs`. The `api-lambda`, `event-lambda` and `sqs-lambda`
+wrappers forward the same input.
 
 ## Changing a module
 

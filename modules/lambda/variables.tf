@@ -85,3 +85,17 @@ variable "data_access_read_only_tables" {
   default     = []
   description = "Additional table ARNs this Lambda may READ ONLY (GetItem/Query, plus index access). Use for cross-service reads of another service's table."
 }
+
+variable "placeholder_source_dir" {
+  type        = string
+  default     = null
+  description = <<-EOT
+    Optional path to a directory containing a placeholder Lambda bundle (an
+    index.mjs for the configured runtime) used only to create the function on
+    first apply. Code is deployed out-of-band and Terraform ignores filename/
+    source_code_hash. Leave null to generate a pathless Node placeholder
+    in-config; set it only if the function uses a non-Node runtime or a
+    consumer-local placeholder is preferred. Relative paths resolve against the
+    directory Terraform is run from.
+  EOT
+}

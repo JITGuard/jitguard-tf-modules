@@ -72,3 +72,9 @@ variable "data_access_read_only_tables" {
   default     = []
   description = "Additional table ARNs this Lambda may READ ONLY (GetItem/Query). Use for cross-service reads."
 }
+
+variable "placeholder_source_dir" {
+  type        = string
+  default     = null
+  description = "Optional path to a consumer-local placeholder bundle used only on first create. See modules/lambda."
+}

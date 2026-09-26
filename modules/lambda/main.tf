@@ -9,12 +9,41 @@ locals {
     SERVICE_NAME = var.name
     ENVIRONMENT  = var.environment
   }
+
+  # Built-in one-line placeholder handler. It is used only when the consumer
+  # supplies no `placeholder_source_dir`; see the archive_file data source
+  # below. Deliberately pathless, so the module ships no bundle of its own and
+  # a `?ref=main` consumer inherits no path assumption (#1099).
+  placeholder_handler = <<-EOT
+    export const handler = async () => ({
+      statusCode: 200,
+      body: JSON.stringify({ message: "placeholder" }),
+    });
+  EOT
 }
 
+# This archive exists only so an initial `terraform apply` has a valid code
+# package to create the function with. It is never the deployed code: the
+# `ignore_changes = [filename, source_code_hash]` lifecycle below means
+# Terraform does not treat the archive as authoritative, and a repo-local
+# `scripts/deploy-lambdas.sh` publishes the real bundle and moves the `live`
+# alias (#1099). When `placeholder_source_dir` is null the placeholder is
+# generated in-config, so the module carries no bundle directory or path.
 data "archive_file" "bundle" {
   type        = "zip"
-  source_dir  = "${path.module}/dummy-bundle"
   output_path = "${local.build_dir}/${local.function_name}.zip"
+
+  # Explicit null is treated as unset, so exactly one of `source_dir` and the
+  # `source` block below is configured.
+  source_dir = var.placeholder_source_dir
+
+  dynamic "source" {
+    for_each = var.placeholder_source_dir == null ? [1] : []
+    content {
+      content  = local.placeholder_handler
+      filename = "index.mjs"
+    }
+  }
 }
 
 resource "aws_iam_role" "this" {
@@ -147,10 +176,11 @@ resource "aws_lambda_function" "this" {
   }
 
   lifecycle {
-    # Code is deployed out-of-band (backend/scripts/deploy-lambdas.sh updates
-    # $LATEST, publishes a version, moves the `live` alias). Ignore the code
-    # inputs so Terraform never overwrites the deployed bundle with the dummy
-    # one. Do NOT list computed attributes (version, qualified_arn,
+    # ignore_changes on the code inputs is the mechanism that makes code
+    # deploys Terraform-independent: a repo-local scripts/deploy-lambdas.sh
+    # updates $LATEST, publishes a version and moves the `live` alias, and
+    # Terraform must never overwrite the deployed bundle with the placeholder
+    # archive. Do NOT list computed attributes (version, qualified_arn,
     # qualified_invoke_arn, source_code_size, last_modified): ignore_changes
     # only applies to configured arguments, so those entries are no-ops that
     # emit "Redundant ignore_changes element" warnings.
