@@ -1,0 +1,7 @@
+# Terraform working files. Each module is initialised and validated in place by CI.
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
+crash.*.log

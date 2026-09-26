@@ -1,0 +1,72 @@
+name: Terraform
+
+# No AWS credentials are configured here, deliberately. This repository is public and
+# generic: module validation is static only, and applying anything is a consumer's job.
+#
+# Each module is validated in its own directory. There is deliberately no root module
+# here, so a root-level `terraform validate` would succeed while checking nothing —
+# a guard that cannot fail is worse than no guard.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: hashicorp/setup-terraform@v4
+        with:
+          terraform_version: 1.14.0
+          terraform_wrapper: false
+
+      - name: Check formatting
+        run: terraform fmt -check -recursive
+
+      - name: Validate each module
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          modules=(infrastructure/modules/*/)
+          if [ ${#modules[@]} -eq 0 ]; then
+            echo "::error::no modules found under infrastructure/modules — nothing was validated"
+            exit 1
+          fi
+          for dir in "${modules[@]}"; do
+            echo "::group::$dir"
+            (cd "$dir" && terraform init -backend=false -input=false && terraform validate)
+            echo "::endgroup::"
+          done
+
+      - name: tflint
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          # v0.64.0, not the v0.39.3 the consuming repos pin: v0.39.3 cannot parse
+          # `optional(type, default)`, which these modules use. See infrastructure/.tflint.hcl.
+          curl -sSL -o /tmp/tflint.zip \
+            "https://github.com/terraform-linters/tflint/releases/download/v0.64.0/tflint_linux_amd64.zip"
+          sudo unzip -oq /tmp/tflint.zip -d /usr/local/bin
+          config="$(realpath infrastructure/.tflint.hcl)"
+          modules=(infrastructure/modules/*/)
+          if [ ${#modules[@]} -eq 0 ]; then
+            echo "::error::no modules found under infrastructure/modules — tflint checked nothing"
+            exit 1
+          fi
+          for dir in "${modules[@]}"; do
+            (cd "$dir" && tflint --no-color --config="$config")
+          done
+
+      - name: Security scan
+        uses: aquasecurity/trivy-action@0.30.0
+        with:
+          scan_type: fs
+          scan_ref: .
+          scanners: misconfig
+          exit_code: '1'
