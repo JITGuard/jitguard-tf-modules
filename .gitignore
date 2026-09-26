@@ -5,3 +5,8 @@
 *.tfplan
 crash.log
 crash.*.log
+
+# A module is a library, not a root module: it must never commit a provider lock
+# file. The lock belongs to the consuming root, and a lock committed here would
+# pin provider resolutions for every consumer of a public module.
+.terraform.lock.hcl
