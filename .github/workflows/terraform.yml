@@ -63,10 +63,14 @@ jobs:
             (cd "$dir" && tflint --no-color --config="$config")
           done
 
-      - name: Security scan
-        uses: aquasecurity/trivy-action@0.30.0
-        with:
-          scan_type: fs
-          scan_ref: .
-          scanners: misconfig
-          exit_code: '1'
+      - name: Trivy config scan
+        # The trivy binary pinned directly, matching jitguard/jitguard-auth/jitguard-billing,
+        # rather than the aquasecurity/trivy-action. Same version as those repos (v0.69.3) so
+        # a misconfiguration is reported identically wherever it is found, and no third-party
+        # action sits in this repository's supply chain.
+        run: |
+          set -euo pipefail
+          curl -sSL -o /tmp/trivy.tar.gz \
+            "https://github.com/aquasecurity/trivy/releases/download/v0.69.3/trivy_0.69.3_Linux-64bit.tar.gz"
+          sudo tar -xzf /tmp/trivy.tar.gz -C /usr/local/bin trivy
+          trivy config --severity HIGH,CRITICAL --skip-version-check --exit-code 1 .
