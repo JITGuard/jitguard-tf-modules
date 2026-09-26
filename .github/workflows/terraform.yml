@@ -33,9 +33,9 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          modules=(infrastructure/modules/*/)
+          modules=(modules/*/)
           if [ ${#modules[@]} -eq 0 ]; then
-            echo "::error::no modules found under infrastructure/modules — nothing was validated"
+            echo "::error::no modules found under modules/ — nothing was validated"
             exit 1
           fi
           for dir in "${modules[@]}"; do
@@ -49,14 +49,14 @@ jobs:
           set -euo pipefail
           shopt -s nullglob
           # v0.64.0, not the v0.39.3 the consuming repos pin: v0.39.3 cannot parse
-          # `optional(type, default)`, which these modules use. See infrastructure/.tflint.hcl.
+          # `optional(type, default)`, which these modules use. See .tflint.hcl.
           curl -sSL -o /tmp/tflint.zip \
             "https://github.com/terraform-linters/tflint/releases/download/v0.64.0/tflint_linux_amd64.zip"
           sudo unzip -oq /tmp/tflint.zip -d /usr/local/bin
-          config="$(realpath infrastructure/.tflint.hcl)"
-          modules=(infrastructure/modules/*/)
+          config="$(realpath .tflint.hcl)"
+          modules=(modules/*/)
           if [ ${#modules[@]} -eq 0 ]; then
-            echo "::error::no modules found under infrastructure/modules — tflint checked nothing"
+            echo "::error::no modules found under modules/ — tflint checked nothing"
             exit 1
           fi
           for dir in "${modules[@]}"; do

@@ -11,10 +11,10 @@ repository is public and its CI has no AWS access.
 ## Consuming
 
 ```
-source = "git::https://github.com/barneyparker/jitguard-tf-modules.git//infrastructure/modules/lambda?ref=main"
+source = "git::https://github.com/barneyparker/jitguard-tf-modules.git//modules/lambda?ref=main"
 ```
 
-The path is `//infrastructure/modules/<name>`.
+The path is `//modules/<name>`.
 
 ### `?ref=main`, not a tag
 
@@ -33,10 +33,10 @@ regresses:
 
 | Module | Purpose |
 |---|---|
-| `infrastructure/modules/lambda` | Base function: IAM, log group, alias, env, optional VPC |
-| `infrastructure/modules/api-lambda` | Lambda behind API Gateway, wired to routes |
-| `infrastructure/modules/event-lambda` | Lambda triggered by an EventBridge rule |
-| `infrastructure/modules/sqs-lambda` | Lambda consuming an SQS queue |
+| `modules/lambda` | Base function: IAM, log group, alias, env, optional VPC |
+| `modules/api-lambda` | Lambda behind API Gateway, wired to routes |
+| `modules/event-lambda` | Lambda triggered by an EventBridge rule |
+| `modules/sqs-lambda` | Lambda consuming an SQS queue |
 
 Each is a single-purpose wrapper over `modules/lambda`, adding only what its trigger needs.
 
