@@ -20,9 +20,9 @@ proven no fourth copy existed anywhere.
 
 ## Decision
 
-- **Modules are public.** They moved to `barneyparker/jitguard-tf-modules`, a
+- **Modules are public.** They moved to `JITGuard/jitguard-tf-modules`, a
   public repository, and every consumer references them by tag-less ref:
-  `git::https://github.com/barneyparker/jitguard-tf-modules.git//modules/<name>?ref=main`.
+  `git::https://github.com/JITGuard/jitguard-tf-modules.git//modules/<name>?ref=main`.
   A public source needs no credential, so no deploy key and no secret are
   involved.
 - **The deploy keys and secrets are retired.** The three read-only deploy keys
