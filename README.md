@@ -1,6 +1,6 @@
 # jitguard-tf-modules
 
-Terraform modules for [jitguard](https://github.com/barneyparker/jit-guard), a SaaS for
+Terraform modules for [jitguard](https://github.com/JITGuard/jit-guard), a SaaS for
 just-in-time AWS access.
 
 These modules are **generic**. Account IDs, ARNs, regions, environments, table names and
@@ -11,7 +11,7 @@ repository is public and its CI has no AWS access.
 ## Consuming
 
 ```
-source = "git::https://github.com/barneyparker/jitguard-tf-modules.git//modules/lambda?ref=main"
+source = "git::https://github.com/JITGuard/jitguard-tf-modules.git//modules/lambda?ref=main"
 ```
 
 The path is `//modules/<name>`.
