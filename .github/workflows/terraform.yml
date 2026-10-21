@@ -3,9 +3,11 @@ name: Terraform
 # No AWS credentials are configured here, deliberately. This repository is public and
 # generic: module validation is static only, and applying anything is a consumer's job.
 #
-# Each module is validated in its own directory. There is deliberately no root module
-# here, so a root-level `terraform validate` would succeed while checking nothing —
-# a guard that cannot fail is worse than no guard.
+# Each module is validated in its own directory, or through its `examples/*` roots when
+# it has them (a module that takes a provider alias cannot validate in place, because the
+# alias has no configuration). There is deliberately no root module here, so a root-level
+# `terraform validate` would succeed while checking nothing — a guard that cannot fail is
+# worse than no guard.
 
 on:
   push:
@@ -39,8 +41,30 @@ jobs:
             exit 1
           fi
           for dir in "${modules[@]}"; do
+            # A module that requires a provider alias cannot validate in place:
+            # the alias has no configuration. Those modules ship example roots,
+            # which wire the alias up and still validate every resource.
+            roots=("${dir}examples/"*/)
+            if [ ${#roots[@]} -eq 0 ]; then
+              roots=("$dir")
+            fi
+            for root in "${roots[@]}"; do
+              echo "::group::$root"
+              (cd "$root" && terraform init -backend=false -input=false && terraform validate)
+              echo "::endgroup::"
+            done
+          done
+
+      - name: Test each module with tests
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          modules=(modules/*/)
+          for dir in "${modules[@]}"; do
+            tests=("${dir}tests/"*.tftest.hcl)
+            [ ${#tests[@]} -eq 0 ] && continue
             echo "::group::$dir"
-            (cd "$dir" && terraform init -backend=false -input=false && terraform validate)
+            (cd "$dir" && terraform init -backend=false -input=false && terraform test)
             echo "::endgroup::"
           done
 

@@ -37,8 +37,17 @@ regresses:
 | `modules/api-lambda` | Lambda behind API Gateway, wired to routes |
 | `modules/event-lambda` | Lambda triggered by an EventBridge rule |
 | `modules/sqs-lambda` | Lambda consuming an SQS queue |
+| `modules/aws-backup-dynamodb` | Scheduled DynamoDB backups with a cross-region copy (DR) |
 
-Each is a single-purpose wrapper over `modules/lambda`, adding only what its trigger needs.
+The lambda modules are single-purpose wrappers over `modules/lambda`, adding only
+what their trigger needs.
+
+`modules/aws-backup-dynamodb` is not a Lambda wrapper. It creates a backup vault
+in the source region, a second vault in a destination region, an IAM role and a
+backup plan that copies every recovery point cross-region. It takes a
+`destination_region` input and expects the caller to pass a matching provider
+alias (`providers = { aws.destination = aws.<alias> }`); see the module's
+`main.tf` for the AWS Backup advanced-DynamoDB prerequisite.
 
 ## A note on `filename`
 
