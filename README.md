@@ -60,10 +60,9 @@ that work: it stops Terraform from overwriting the deployed bundle with the plac
 
 The module ships **no placeholder bundle of its own**. `modules/lambda` generates a
 pathless one-line Node placeholder in-config, which is enough for the initial create before
-the first out-of-band deploy. If a function uses a non-Node runtime, or you would rather
-keep the placeholder in your own repository, set `placeholder_source_dir` to a directory
-containing a suitable `index.mjs`. The `api-lambda`, `event-lambda` and `sqs-lambda`
-wrappers forward the same input.
+the first out-of-band deploy. There is deliberately no input for supplying an alternative
+placeholder bundle: code is always deployed out-of-band, so the placeholder is never
+invoked, and no consumer has a reason to pass one.
 
 ## Changing a module
 
