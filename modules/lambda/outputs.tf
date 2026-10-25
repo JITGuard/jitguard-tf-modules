@@ -18,10 +18,6 @@ output "alias_name" {
   value = aws_lambda_alias.live.name
 }
 
-output "function_qualified_arn" {
-  value = aws_lambda_function.this.qualified_arn
-}
-
 output "role_arn" {
   value = aws_iam_role.this.arn
 }
