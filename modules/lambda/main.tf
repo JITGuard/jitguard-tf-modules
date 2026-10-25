@@ -10,8 +10,7 @@ locals {
     ENVIRONMENT  = var.environment
   }
 
-  # Built-in one-line placeholder handler. It is used only when the consumer
-  # supplies no `placeholder_source_dir`; see the archive_file data source
+  # Built-in one-line placeholder handler, used by the archive_file data source
   # below. Deliberately pathless, so the module ships no bundle of its own and
   # a `?ref=main` consumer inherits no path assumption (#1099).
   placeholder_handler = <<-EOT
@@ -27,22 +26,14 @@ locals {
 # `ignore_changes = [filename, source_code_hash]` lifecycle below means
 # Terraform does not treat the archive as authoritative, and a repo-local
 # `scripts/deploy-lambdas.sh` publishes the real bundle and moves the `live`
-# alias (#1099). When `placeholder_source_dir` is null the placeholder is
-# generated in-config, so the module carries no bundle directory or path.
+# alias (#1099).
 data "archive_file" "bundle" {
   type        = "zip"
   output_path = "${local.build_dir}/${local.function_name}.zip"
 
-  # Explicit null is treated as unset, so exactly one of `source_dir` and the
-  # `source` block below is configured.
-  source_dir = var.placeholder_source_dir
-
-  dynamic "source" {
-    for_each = var.placeholder_source_dir == null ? [1] : []
-    content {
-      content  = local.placeholder_handler
-      filename = "index.mjs"
-    }
+  source {
+    content  = local.placeholder_handler
+    filename = "index.mjs"
   }
 }
 

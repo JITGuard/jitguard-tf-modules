@@ -14,7 +14,6 @@ module "lambda" {
   timeout                      = var.timeout
   environment                  = var.environment
   name                         = var.name
-  placeholder_source_dir       = var.placeholder_source_dir
 }
 
 resource "aws_apigatewayv2_integration" "this" {
