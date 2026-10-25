@@ -53,10 +53,6 @@ output "function_alias_arn" {
   value = module.lambda.function_alias_arn
 }
 
-output "integration_id" {
-  value = aws_apigatewayv2_integration.this.id
-}
-
 output "role_arn" {
   value = module.lambda.role_arn
 }
