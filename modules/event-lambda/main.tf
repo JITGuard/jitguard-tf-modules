@@ -1,6 +1,7 @@
 module "lambda" {
   source = "../lambda"
 
+  description                  = var.description
   handler                      = var.handler
   environment_variables        = var.environment_variables
   extra_policy_documents       = var.extra_policy_documents

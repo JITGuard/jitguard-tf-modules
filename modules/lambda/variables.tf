@@ -3,6 +3,12 @@ variable "name" {
   description = "Function name used for resource naming and SERVICE_NAME (e.g. admin-customers, stripe-event-handler)."
 }
 
+variable "description" {
+  type        = string
+  default     = null
+  description = "Human-readable description of the function's purpose, shown in the Lambda console and API (max 256 characters)."
+}
+
 variable "handler" {
   type        = string
   default     = "index.handler"

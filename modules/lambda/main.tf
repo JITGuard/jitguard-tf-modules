@@ -151,6 +151,7 @@ resource "aws_cloudwatch_log_group" "this" {
 resource "aws_lambda_function" "this" {
   filename         = data.archive_file.bundle.output_path
   function_name    = local.function_name
+  description      = var.description
   role             = aws_iam_role.this.arn
   handler          = var.handler
   runtime          = var.runtime
