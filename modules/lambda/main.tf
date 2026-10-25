@@ -154,7 +154,7 @@ resource "aws_lambda_function" "this" {
 
   logging_config {
     # Powertools already emits JSON; Lambda passes it through unwrapped so the
-    # { $.step = ... } metric filters in metric-filters.tf keep matching.
+    # consumer's { $.step = ... } metric filters keep matching.
     log_format = "JSON"
     log_group  = aws_cloudwatch_log_group.this.name
   }
